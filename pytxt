@@ -1,0 +1,63 @@
+#!/usr/bin/env python
+
+import os
+import sys
+import getopt
+  
+
+class Pytxt(object):
+	"""docstring for Pytxt"""
+	def __init__(self):
+		super(Pytxt, self).__init__()
+		#self.arg = arg
+		
+	def combine(self, iput, oput, prefix=None,postfix=None):
+		lst = self.scan_files(iput, prefix, postfix)
+		l = len(lst)
+		f = open(oput,"w")
+		linenum = 0
+		for i in range(l):
+			x = open(lst[i], "r")
+			c =  x.readlines()
+			count = len(c)
+			for j in range(count):
+				if c[j].strip(' \r\n\t/*') != '' and not c[j].startswith('using'):
+					#print c[j]
+					f.write(c[j]) 
+			x.close()
+		f.close()
+
+		return;
+
+	def scan_files(self, directory,prefix=None,postfix=None):
+		files_list=[]
+	    
+		for root, sub_dirs, files in os.walk(directory):
+			for special_file in files:
+				if postfix:
+					if special_file.endswith(postfix):
+				  		files_list.append(os.path.join(root,special_file))
+				elif prefix:
+					if special_file.startswith(prefix):
+				  		files_list.append(os.path.join(root,special_file))
+				else:
+					files_list.append(os.path.join(root,special_file))
+		           
+		return files_list
+
+
+
+p = Pytxt()
+
+opts, args = getopt.getopt(sys.argv[1:], "hi:o:f:p:")
+
+d=dict()
+for op, value in opts:
+	d[op] = value
+
+if "-h" in d:
+	print 'Useage:'
+	print './pythxt -i "/Users/work/dir"', \
+			'-o "./src.txt" -f "" -p ".cs"'
+else:
+	p.combine(d.get("-i"), d.get("-o"), d.get("-f"),d.get("-p"))
